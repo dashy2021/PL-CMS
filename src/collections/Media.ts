@@ -30,6 +30,13 @@ export const Media: CollectionConfig = {
       //required: true,
     },
     {
+      // Lets the WordPress migration upload each file once and find it again on re-runs.
+      name: 'wpSourceUrl',
+      type: 'text',
+      index: true,
+      admin: { readOnly: true, description: 'Original WordPress URL (set by the migration)' },
+    },
+    {
       name: 'caption',
       type: 'richText',
       editor: lexicalEditor({
