@@ -29,6 +29,9 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    // Dev-mode schema push only against a local database. Scripts run on a laptop against Neon
+    // (pnpm migrate:wp) would otherwise push the schema there and block `payload migrate` on deploy.
+    push: /@?(localhost|127\.0\.0\.1)(:|\/)/.test(process.env.DATABASE_URL || ''),
   }),
   collections: [Posts, Categories, Tags, Media, Users],
   cors: [getServerSideURL()].filter(Boolean),
