@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "vercel-build": "cross-env NODE_OPTIONS=--no-deprecation payload migrate && cross-env NODE_OPTIONS=--no-deprecation next build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm start",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
@@ -24,6 +25,7 @@
     "@payloadcms/plugin-nested-docs": "3.94.1",
     "@payloadcms/plugin-seo": "3.94.1",
     "@payloadcms/richtext-lexical": "3.94.1",
+    "@payloadcms/storage-vercel-blob": "3.94.1",
     "@payloadcms/ui": "3.94.1",
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",

@@ -1,5 +1,6 @@
 import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { seoPlugin } from '@payloadcms/plugin-seo'
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { Plugin } from 'payload'
 
@@ -22,5 +23,14 @@ export const plugins: Plugin[] = [
   seoPlugin({
     generateTitle,
     generateURL,
+  }),
+  // Stores uploads in Vercel Blob when BLOB_READ_WRITE_TOKEN is set (Vercel's disk is read-only).
+  // Without the token, uploads stay in public/media for local development.
+  vercelBlobStorage({
+    enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+    collections: { media: true },
+    token: process.env.BLOB_READ_WRITE_TOKEN,
+    // The browser uploads straight to Blob, so files over Vercel's 4.5 MB request limit (PDFs) work.
+    clientUploads: true,
   }),
 ]
