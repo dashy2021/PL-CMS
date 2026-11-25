@@ -224,6 +224,7 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  _objectKey?: string | null;
   folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -652,6 +653,7 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   wpSourceUrl?: T;
   caption?: T;
+  _objectKey?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
