@@ -1,4 +1,4 @@
-# bn-cms // //
+# bn-cms
 
 Payload 3 CMS for the BUSINESSNEXT blog. It has no website of its own: `/` redirects to
 `/admin`, and the website (`bn_revamp-fe-web`) reads posts over the REST API at `/api/posts`.
