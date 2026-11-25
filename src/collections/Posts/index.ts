@@ -28,6 +28,7 @@ import { slugField } from 'payload'
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { slugify } from '../../utilities/slugify'
+import { revalidateDeletedPost, revalidatePost } from './hooks/revalidatePost'
 
 /**
  * Blog posts, served by the website at /blogs/<slug>/. Most of them come from WordPress
@@ -51,6 +52,10 @@ export const Posts: CollectionConfig<'posts'> = {
     categories: true,
     readMinutes: true,
     publishedAt: true,
+  },
+  hooks: {
+    afterChange: [revalidatePost],
+    afterDelete: [revalidateDeletedPost],
   },
   admin: {
     defaultColumns: ['title', 'slug', 'publishedAt', '_status'],

@@ -47,7 +47,7 @@ pnpm migrate:wp force      # re-import unchanged posts too
 straight after it.** Without it, imported images won't load on Vercel (Blob storage).
 
 ```bash
-DATABASE_URL='<production Neon pooled connection string>' pnpm repair:media
+! DATABASE_URL='<production Neon pooled connection string>' pnpm repair:media
 ```
 
 Copy the connection string from the Neon dashboard or the Vercel project's environment variables.
