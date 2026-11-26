@@ -13,6 +13,7 @@
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "ii": "cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install",
     "repair:media": "cross-env NODE_OPTIONS=--no-deprecation payload run src/scripts/repair-media-blob.ts",
+    "seed:media-centre": "cross-env NODE_OPTIONS=--no-deprecation payload run src/scripts/seed-media-centre.ts",
     "migrate:wp": "cross-env NODE_OPTIONS=--no-deprecation payload run src/scripts/migrate-wordpress.ts",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
     "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation eslint . --fix",

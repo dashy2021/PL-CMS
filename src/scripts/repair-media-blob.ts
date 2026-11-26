@@ -3,16 +3,23 @@
  *
  * Needed when media records exist (e.g. `pnpm migrate:wp` was run against Neon without
  * BLOB_READ_WRITE_TOKEN) but their files never reached Blob, so /api/media/file/* returns 404.
- * The original is re-downloaded from `wpSourceUrl` and every image size is regenerated with sharp
- * at the recorded dimensions. Database records are not modified, so post links keep working.
+ * The original is read from public/media when it is there (uploads made with local storage, e.g.
+ * `pnpm seed:media-centre` with MEDIA_STORAGE=local), otherwise re-downloaded from `wpSourceUrl`.
+ * Image sizes are taken from public/media too, or regenerated with sharp at the recorded dimensions.
+ * Database records are not modified, so post links keep working.
  *
  *   DATABASE_URL=<neon url> pnpm repair:media              # upload what's missing
  *   DATABASE_URL=<neon url> pnpm repair:media dry-run      # only report
  */
 import config from '@payload-config'
 import { list, put } from '@vercel/blob'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import { getPayload } from 'payload'
 import sharp from 'sharp'
+
+const LOCAL_DIR = path.resolve('public/media')
+const readLocal = (filename: string) => fs.readFile(path.join(LOCAL_DIR, filename)).catch(() => null)
 
 const DRY_RUN = process.argv.includes('dry-run')
 const CONCURRENCY = 5
@@ -49,16 +56,23 @@ async function repair(doc: any) {
     console.log(`would upload ${missing.length} file(s) for #${doc.id} ${doc.filename}`)
     return void stats.ok++
   }
-  if (!doc.wpSourceUrl) throw new Error('no wpSourceUrl to download the original from')
-
-  const res = await fetch(doc.wpSourceUrl)
-  if (!res.ok) throw new Error(`download ${res.status} ${doc.wpSourceUrl}`)
-  const original = Buffer.from(await res.arrayBuffer())
+  let original = await readLocal(doc.filename)
+  if (!original) {
+    if (!doc.wpSourceUrl) throw new Error('not in public/media and no wpSourceUrl to download it from')
+    const res = await fetch(doc.wpSourceUrl)
+    if (!res.ok) throw new Error(`download ${res.status} ${doc.wpSourceUrl}`)
+    original = Buffer.from(await res.arrayBuffer())
+  }
 
   if (!existing.has(doc.filename)) await upload(doc.filename, original, doc.mimeType)
 
   for (const [name, size] of sizes) {
     if (existing.has(size.filename)) continue
+    const local = await readLocal(size.filename)
+    if (local) {
+      await upload(size.filename, local, size.mimeType || doc.mimeType)
+      continue
+    }
     const cfg = sizeConfigs.get(name)
     const fixedBox = Boolean(cfg?.width && cfg?.height)
     const image = sharp(original, { animated: doc.mimeType === 'image/gif' }).rotate()

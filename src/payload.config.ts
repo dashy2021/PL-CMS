@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
+import { MediaCentre } from './collections/MediaCentre'
 import { Posts } from './collections/Posts'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
@@ -31,9 +32,13 @@ export default buildConfig({
     },
     // Dev-mode schema push only against a local database. Scripts run on a laptop against Neon
     // (pnpm migrate:wp) would otherwise push the schema there and block `payload migrate` on deploy.
-    push: /@?(localhost|127\.0\.0\.1)(:|\/)/.test(process.env.DATABASE_URL || ''),
+    // Also off with MEDIA_STORAGE=local: the Blob plugin's `media` column disappears then, and
+    // push would offer to drop it (data loss). Run `pnpm payload migrate` for schema changes instead.
+    push:
+      /@?(localhost|127\.0\.0\.1)(:|\/)/.test(process.env.DATABASE_URL || '') &&
+      process.env.MEDIA_STORAGE !== 'local',
   }),
-  collections: [Posts, Categories, Tags, Media, Users],
+  collections: [Posts, MediaCentre, Categories, Tags, Media, Users],
   cors: [getServerSideURL()].filter(Boolean),
   plugins,
   secret: process.env.PAYLOAD_SECRET,

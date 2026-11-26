@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     posts: Post;
+    'media-centre': MediaCentre;
     categories: Category;
     tags: Tag;
     media: Media;
@@ -86,6 +87,7 @@ export interface Config {
   };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
+    'media-centre': MediaCentreSelect<false> | MediaCentreSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -224,7 +226,6 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
-  _objectKey?: string | null;
   folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -370,6 +371,44 @@ export interface Tag {
   wpId?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-centre".
+ */
+export interface MediaCentre {
+  id: number;
+  title: string;
+  excerpt?: string | null;
+  /**
+   * Card image in the listing.
+   */
+  image: number | Media;
+  /**
+   * What the card opens in a new tab.
+   */
+  linkType: 'file' | 'external';
+  file?: (number | null) | Media;
+  url?: string | null;
+  /**
+   * Show this story as the featured hero at the top of the media centre page.
+   */
+  featured?: boolean | null;
+  /**
+   * Hero image. Falls back to the card image when empty.
+   */
+  featuredImage?: (number | null) | Media;
+  category: 'announcements' | 'analyst-awards' | 'partnerships' | 'customer-wins' | 'people-culture' | 'in-the-press';
+  publishedAt: string;
+  readTime: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -519,6 +558,10 @@ export interface PayloadLockedDocument {
         value: number | Post;
       } | null)
     | ({
+        relationTo: 'media-centre';
+        value: number | MediaCentre;
+      } | null)
+    | ({
         relationTo: 'categories';
         value: number | Category;
       } | null)
@@ -612,6 +655,28 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-centre_select".
+ */
+export interface MediaCentreSelect<T extends boolean = true> {
+  title?: T;
+  excerpt?: T;
+  image?: T;
+  linkType?: T;
+  file?: T;
+  url?: T;
+  featured?: T;
+  featuredImage?: T;
+  category?: T;
+  publishedAt?: T;
+  readTime?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
@@ -653,7 +718,6 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   wpSourceUrl?: T;
   caption?: T;
-  _objectKey?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
