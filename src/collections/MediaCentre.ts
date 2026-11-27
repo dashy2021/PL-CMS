@@ -3,22 +3,16 @@ import { slugField } from 'payload'
 
 import { authenticated } from '../access/authenticated'
 import { authenticatedOrPublished } from '../access/authenticatedOrPublished'
+import { revalidateCollectionHooks } from '../utilities/revalidateWebsite'
 import { slugify } from '../utilities/slugify'
+
+const revalidate = revalidateCollectionHooks('media-centre')
 
 /**
  * Media centre stories (press releases, coverage, awards), listed on the website's media centre
  * page. Mirrors `MediaItem` in the frontend (src/features/media-centre/types.ts); each card opens
  * either an uploaded PDF or an article on a publisher's site in a new tab.
  */
-export const MEDIA_CENTRE_CATEGORIES = [
-  { label: 'Announcements', value: 'announcements' },
-  { label: 'Analyst & Awards', value: 'analyst-awards' },
-  { label: 'Partnerships', value: 'partnerships' },
-  { label: 'Customer Wins', value: 'customer-wins' },
-  { label: 'People & Culture', value: 'people-culture' },
-  { label: 'In The Press', value: 'in-the-press' },
-]
-
 export const MediaCentre: CollectionConfig<'media-centre'> = {
   slug: 'media-centre',
   labels: {
@@ -33,9 +27,15 @@ export const MediaCentre: CollectionConfig<'media-centre'> = {
   },
   admin: {
     useAsTitle: 'title',
+    group: 'Media Centre',
     defaultColumns: ['title', 'category', 'publishedAt', 'featured', '_status'],
   },
   defaultSort: '-publishedAt',
+  // Publish/edit/unpublish/delete shows on the website at once instead of after its cache.
+  hooks: {
+    afterChange: [revalidate.afterChange],
+    afterDelete: [revalidate.afterDelete],
+  },
   fields: [
     {
       name: 'title',
@@ -109,10 +109,10 @@ export const MediaCentre: CollectionConfig<'media-centre'> = {
     },
     {
       name: 'category',
-      type: 'select',
+      type: 'relationship',
+      relationTo: 'media-centre-categories',
       required: true,
       index: true,
-      options: MEDIA_CENTRE_CATEGORIES,
       admin: { position: 'sidebar' },
     },
     {

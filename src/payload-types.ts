@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     posts: Post;
     'media-centre': MediaCentre;
+    'media-centre-categories': MediaCentreCategory;
     categories: Category;
     tags: Tag;
     media: Media;
@@ -88,6 +89,7 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'media-centre': MediaCentreSelect<false> | MediaCentreSelect<true>;
+    'media-centre-categories': MediaCentreCategoriesSelect<false> | MediaCentreCategoriesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -398,7 +400,7 @@ export interface MediaCentre {
    * Hero image. Falls back to the card image when empty.
    */
   featuredImage?: (number | null) | Media;
-  category: 'announcements' | 'analyst-awards' | 'partnerships' | 'customer-wins' | 'people-culture' | 'in-the-press';
+  category: number | MediaCentreCategory;
   publishedAt: string;
   readTime: string;
   /**
@@ -409,6 +411,25 @@ export interface MediaCentre {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-centre-categories".
+ */
+export interface MediaCentreCategory {
+  id: number;
+  _order?: string | null;
+  /**
+   * Tab label on the website, e.g. "Analyst & Awards".
+   */
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -562,6 +583,10 @@ export interface PayloadLockedDocument {
         value: number | MediaCentre;
       } | null)
     | ({
+        relationTo: 'media-centre-categories';
+        value: number | MediaCentreCategory;
+      } | null)
+    | ({
         relationTo: 'categories';
         value: number | Category;
       } | null)
@@ -674,6 +699,18 @@ export interface MediaCentreSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-centre-categories_select".
+ */
+export interface MediaCentreCategoriesSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

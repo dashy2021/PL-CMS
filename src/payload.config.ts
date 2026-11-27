@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { MediaCentre } from './collections/MediaCentre'
+import { MediaCentreCategories } from './collections/MediaCentreCategories'
 import { Posts } from './collections/Posts'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
@@ -38,7 +39,7 @@ export default buildConfig({
       /@?(localhost|127\.0\.0\.1)(:|\/)/.test(process.env.DATABASE_URL || '') &&
       process.env.MEDIA_STORAGE !== 'local',
   }),
-  collections: [Posts, MediaCentre, Categories, Tags, Media, Users],
+  collections: [Posts, MediaCentre, MediaCentreCategories, Categories, Tags, Media, Users],
   cors: [getServerSideURL()].filter(Boolean),
   plugins,
   secret: process.env.PAYLOAD_SECRET,

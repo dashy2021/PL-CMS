@@ -3,9 +3,12 @@
  *
  * Reads, from the website repo (bn_revamp-fe-web):
  *   src/features/media-centre/data/media-items.json   - the stories
- *   src/features/media-centre/data/media-centre.json  - `hero.storyId` / `hero.image` = the featured story
+ *   src/features/media-centre/data/media-centre.json  - `hero.storyId` / `hero.image` = the featured story,
+ *                                                       `listing.categories` = the category tabs
  *   public/...                                         - the card images, hero image and PDFs
  * Images and PDFs are uploaded to `media` (Vercel Blob when BLOB_READ_WRITE_TOKEN is set).
+ *
+ * Categories go to `media-centre-categories` (matched on slug, created in tab order when missing).
  *
  * Safe to re-run: stories are matched on slug (the JSON `id`) and updated in place, and files
  * already in `media` (same filename) are reused instead of uploaded again.
@@ -74,6 +77,10 @@ if (missing.length) {
 console.log(`${items.length} stories found in ${DATA_DIR}; all files present.`)
 if (DRY_RUN) process.exit(0)
 
+const fail = (message: string): never => {
+  throw new Error(message)
+}
+
 const payload = await getPayload({ config })
 const mediaCache = new Map<string, number>()
 
@@ -104,6 +111,25 @@ async function upload(src: string, alt = ''): Promise<number> {
   return id
 }
 
+/** Category slug -> id, creating the categories from `listing.categories` when missing. */
+const categoryIds = new Map<string, number>()
+for (const { id: slug, label } of (page?.listing?.categories ?? []) as { id: string; label: string }[]) {
+  const existing = await payload.find({
+    collection: 'media-centre-categories',
+    where: { slug: { equals: slug } },
+    limit: 1,
+    depth: 0,
+  })
+  const doc =
+    existing.docs[0] ??
+    (await payload.create({
+      collection: 'media-centre-categories',
+      data: { title: label, slug, generateSlug: false },
+      context: CONTEXT,
+    }))
+  categoryIds.set(slug, doc.id)
+}
+
 const stats = { created: 0, updated: 0, failed: [] as { id: string; error: string }[] }
 
 for (const [n, item] of items.entries()) {
@@ -113,7 +139,7 @@ for (const [n, item] of items.entries()) {
     const data = {
       title: item.title,
       excerpt: item.excerpt ?? null,
-      category: item.category as any,
+      category: categoryIds.get(item.category) ?? fail(`unknown category "${item.category}"`),
       // Noon UTC so the calendar day is the same in every timezone.
       publishedAt: new Date(`${item.publishedAt}T12:00:00.000Z`).toISOString(),
       readTime: item.readTime,
